@@ -1,0 +1,120 @@
+
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+
+# loading dataset to apandas dataframe
+credit_card_data = pd.read_csv('/content/creditcard.csv')
+
+# first  5 rows  of the data set
+credit_card_data.head()
+
+credit_card_data.tail()
+
+# dataset infrmation
+credit_card_data.info()
+
+# checking the number of  missing  values in each column
+credit_card_data.isnull().sum()
+
+#  distribution  of legit  transaction $  fraudlent transactrion
+credit_card_data['Class'].value_counts()
+
+"""This dataset is highly unbalanced
+
+0 -- > normal transaction
+
+1 -- > fraudlent transaction
+"""
+
+# separating  the data  for analysis
+legit = credit_card_data[credit_card_data.Class == 0]
+fraud = credit_card_data[credit_card_data.Class == 1]
+
+print(legit.shape)
+print(fraud.shape)
+
+# statistical measures of the data
+legit.Amount.describe()
+
+fraud.Amount.describe()
+
+# compare the values for both transaction
+credit_card_data.groupby('Class').mean()
+
+"""Under-Sampling
+
+Build a sample  dataset containing distribution of  normal transactions  and fraudulent transactions
+
+Number of fraudlent transactions --> 492
+"""
+
+legit_sample = legit.sample (n=492)
+
+"""concatenating two dataframes"""
+
+new_dataset =pd.concat([legit_sample,fraud],axis=0)
+
+new_dataset.head()
+
+new_dataset.tail()
+
+new_dataset['Class'].value_counts() # Change 'class' to 'Class'
+
+new_dataset.groupby('Class').mean()
+
+"""splitting the data into features & targets"""
+
+x = new_dataset.drop(columns='Class', axis=1)  # Change 'class' to 'Class'
+y = new_dataset['Class']  # Change 'class' to 'Class'
+
+print(x)
+
+print(y)
+
+"""split the data into training data & testing data"""
+
+x_training, x_test, y_train, y_test= train_test_split(x,y,test_size=0.2,stratify=y,random_state=2)
+
+print(x.shape, x_training.shape, x_test.shape)  # Change 'x_train' to 'x_training'
+
+"""Model Trainin
+
+Logistic Regression
+"""
+
+model=LogisticRegression()
+
+# training the logistic regression model with training data
+model.fit(x_training , y_train) # Changed 'x_train' to 'x_training'
+
+"""Model evaluation
+
+Accuracy score
+"""
+
+# accuracy on training data
+x_train_prediction = model.predict(x_training) # Changed 'x_train' to 'x_training'
+training_data_accuracy=accuracy_score(x_train_prediction,y_train)
+
+print('accuracy on training data : ',training_data_accuracy)
+
+# accuracy on test data
+x_test_prediction = model.predict(x_test)
+test_data_accuracy = accuracy_score(x_test_prediction,y_test)
+
+print('accuracy score on test data:',test_data_accuracy)
+
+"""PROJECT SUMMARY -:  
+(1). Data Loading and Exploration: You started by loading the credit card transaction data into a pandas DataFrame and explored its structure, including the data types of columns, missing values, and the distribution of legitimate and fraudulent transactions.
+
+(2). Data Balancing: You addressed the class imbalance issue in the dataset (where fraudulent transactions were significantly fewer than legitimate ones) using under-sampling. You created a new dataset with a balanced representation of both transaction types.
+
+(3). Data Splitting: You divided the balanced dataset into features (X) and target (y) variables. The features represent the transaction attributes, while the target variable indicates whether a transaction is fraudulent (1) or not (0).
+
+(4). Model Training: You chose Logistic Regression as your machine learning model and trained it using the training data.
+
+(5). Model Evaluation: You evaluated the model's performance using the accuracy score metric on both the training and test datasets. The results indicated how well the model predicts credit card fraud.
+"""
